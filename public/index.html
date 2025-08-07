@@ -15,7 +15,7 @@
       const amount = 500; // INR
 
       // 1️⃣ Create Order
-      const orderResponse = await fetch("http://localhost:3000/create-order", {
+      const orderResponse = await fetch("http://0.0.0.0:3000/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ amount })
@@ -34,7 +34,7 @@
 
         handler: async function (response) {
           // 3️⃣ Securely verify with backend
-          const verifyResponse = await fetch("http://localhost:3000/check-status", {
+          const verifyResponse = await fetch("http://0.0.0.0:3000/check-status", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ razorpay_order_id: orderData.id })
