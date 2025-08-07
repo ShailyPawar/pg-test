@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Razorpay Payment Example</title>
+</head>
+<body>
+  <h1>Pay with Razorpay</h1>
+  <button id="pay-btn">Pay ₹500</button>
+
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <script>
+    document.getElementById('pay-btn').addEventListener('click', async () => {
+      const amount = 500; // INR
+
+      // 1️⃣ Create Order
+      const orderResponse = await fetch("http://localhost:3000/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount })
+      });
+
+      const orderData = await orderResponse.json();
+
+      // 2️⃣ Razorpay Checkout
+      const options = {
+        key: "rzp_test_j3dYWKRUu4qxU8", // Your Razorpay key
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: "My Test Store",
+        description: "Test Payment",
+        order_id: orderData.id,
+
+        handler: async function (response) {
+          // 3️⃣ Securely verify with backend
+          const verifyResponse = await fetch("http://localhost:3000/check-status", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ razorpay_order_id: orderData.id })
+          });
+
+          const result = await verifyResponse.json();
+
+          if (result.status === "authorized") {
+            alert(
+              `✅ Payment Verified!\n` +
+              `Payment ID: ${result.razorpay_order_id}\n` +
+              `Method: ${result.method}\n` +
+              `Amount: ${result.amount}`
+            );
+          } else {
+            alert("❌ Payment not captured.\nStatus: " + result.payment_status);
+          }
+        },
+
+        theme: { color: "#3399cc" }
+      };
+
+      const rzp = new Razorpay(options);
+      rzp.open();
+    });
+  </script>
+</body>
+</html>
